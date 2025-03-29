@@ -6,7 +6,8 @@ This web application allows users to search and navigate through different categ
 ## Key Features
 
 - Users can view headlines from different categories like Business, Technology, Health, etc.
-- Allows searching for specific news articles.
+- Allows searching for specific news articles, or keyword.
+- Handles ratelimits and errors
 - Fetches news from the [NewsAPI](https://newsapi.org).
 - Built using Django with HTML and CSS for the front end.
 
@@ -91,7 +92,7 @@ To deploy the app to a production web server, follow these steps:
 sudo apt install apache2 libapache2-mod-wsgi-py3
 ```
 
-2. Set up your Django project on the server, typically in `/var/www/your-django-app`.
+2. Set up your Django project on the server, typically in `/var/www/`.
 
 3. Configure your Apache virtual host to serve the Django application. Ensure you include a WSGI configuration like:
 
@@ -134,3 +135,5 @@ This app uses the [NewsAPI](https://newsapi.org) to fetch news data. Please refe
 ## Conclusion
 
 This project demonstrates how to integrate external news APIs into a Django web application and how to deploy it to a production environment using Apache. It also highlights the challenges encountered during development and how they were resolved.
+
+## Link to Demo
