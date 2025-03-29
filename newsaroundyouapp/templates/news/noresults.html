@@ -1,0 +1,68 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="{% static 'styles/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'styles/header.css' %}">
+    <link rel="stylesheet" href="{% static 'styles/footer.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100..900&display=swap" rel="stylesheet">
+</head>
+<body class="roboto-slab-uniquifier">
+    <header>
+        <a href="{% url 'newsaroundyouapp:home' %}"><img src="{% static 'img/logo.png' %}" alt="" width="150px"></a>
+        <nav>
+            <ul>
+                <li><a href="{% url 'newsaroundyouapp:home' %}" id="home">HOME</a></li>
+                <li><a href="{% url 'newsaroundyouapp:search_by_category' 'general' %}">General</a></li>
+                <li><a href="{% url 'newsaroundyouapp:search_by_category' 'business' %}">Business</a></li>
+                <li><a href="{% url 'newsaroundyouapp:search_by_category' 'entertainment' %}">Entertainment</a></li>
+                <li><a href="{% url 'newsaroundyouapp:search_by_category' 'health' %}">Health</a></li>
+                <li><a href="{% url 'newsaroundyouapp:search_by_category' 'science' %}">Science</a></li>
+                <li><a href="{% url 'newsaroundyouapp:search_by_category' 'sports' %}">Sports</a></li>
+                <li><a href="{% url 'newsaroundyouapp:search_by_category' 'technology' %}">Technology</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main class="content">
+        <div class="banner">
+            <div class="stayinformed">
+                <h2 style="font-size: 20px;">No results for <span>#{{ search_keyword }}</span>!</h2>
+            </div>
+            <div class="search">
+                <h4>Search <span>Again</span> ?</h4>
+                <form action="{% url 'newsaroundyouapp:search' %}" method="GET">
+                    <div class="search-bar">
+                        <img src="{% static 'img/search-i.png' %}" alt="search-icon" width="20px" id="search-icon">
+                        <input type="search" name="q" id="search_input">
+                    </div>
+                    <div class="buttons roboto-slab-uniquifier" >
+                        <input type="submit" value="Search" id="button">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+    <div class="content sources-block">
+        <h4>From The world's <span>Trusted</span> Sources</h4>
+        <ul class="sources">
+            <li><img src="{% static 'img/BBC-News-Logo-1997.png' %}" alt="" width="110px"></li>
+            <li><img src="{% static 'img/CNN.svg.png' %}" alt="" width="50px"></li>
+            <li><img src="{% static 'img/ESPN_logos.png' %}" alt="" width="100px"></li>
+            <li><img src="{% static 'img/Reuters_Logo.svg.png' %}" width="100px"></li>
+            <li><img src="{% static 'img/Abc-news-logo.png' %}" alt="" width="100px"></li>
+            <li><img src="{% static 'img/france24logo.png' %}" alt="" width="50px"></li>
+            <li><img src="{% static 'img/forbes_logo.png' %}" alt="" width="80px"></li>
+            <li><img src="{% static 'img/washingtonpost_logo.png' %}" alt="" width="200px"></li>
+            <li><img src="{% static 'img/Daily_Mail_masthead.svg' %}" alt="" width="150px"></li>
+        </ul>
+    </div>
+    <footer class="roboto-slab-uniquifier">
+        &copy; 2025 News Around You | All rights reserved.
+    </footer>
+</body>
+</html>
