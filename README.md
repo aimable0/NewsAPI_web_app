@@ -3,6 +3,11 @@
 
 This web application allows users to search and navigate through different categories of news headlines, such as Business, Health, Sports, Technology, and more. The app uses the [NewsAPI](https://newsapi.org) to fetch live top news data and display it to the user.
 
+## Link to website
+	1. https://www.naimable.tech (load balancer)
+	2. http://web-01.naimable.tech
+	3. http://web-02.naimable.tech
+
 ## Link to Demo
 https://youtu.be/gB-2hEPr728
 
@@ -251,7 +256,8 @@ server {
 	run the code inside your django project.
 	- python3 manage.py collectstatic
 
-+ Test again and  :) this should render the page with its static components.
++ Test again and  :)
+Now we should be able to access the website on the allowed stated hosts or domains
 ---
 
 ## 5. API Used
