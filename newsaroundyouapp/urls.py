@@ -7,6 +7,6 @@ urlpatterns = [
     path(
         "category/<str:category>/", views.search_by_category, name="search_by_category"
     ),
-    path("search", views.search, name="search"),
+    path("search/", views.search, name="search"),
     path("error", views.error_page, name="error"),
 ]

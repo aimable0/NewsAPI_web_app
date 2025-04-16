@@ -16,7 +16,7 @@ def home(request):
 
 
 def search(request):
-    search_keyword = request.GET["q"]
+    search_keyword = request.GET.get("q")
     params = {
         "apiKey": API_KEY,
         "q": search_keyword,
@@ -44,7 +44,6 @@ def search(request):
 
 
 def search_by_category(request, category):
-    API_KEY = "28072e2ae4e1448b96bc16d1300e475e"
     API_ENDPOINT = "https://newsapi.org/v2/top-headlines"
     category = category
     params = {"apiKey": API_KEY, "category": category}
