@@ -95,10 +95,13 @@ To deploy the app to a production web server, follow these steps:
 ## Deployment in details
 # NewsAroundYou - Deployment Guide
 
+ssh into your server .. (ex: ssh ubuntu@IP)
+
 1.  Updated the ubuntu server to match the most recent version..
 
+
 	check version => lsb_release -a
-	update to newer release .. (to make sure our system is uptodate)
+	update to newer release .. (to make sure our system is uptodate and will give no version mismatch with the dependencies)
 		- sudo apt update && sudo apt upgrade && sudo apt dist-upgrade
 		-  sudo apt install update-manager-core
 		- sudo do-release-upgrade:
@@ -113,10 +116,10 @@ Or update all packages (if recent version)
 	- sudo apt full-upgrade
 
 2.  Sent the app folder using scp to the web server ..
-	using scp -r source destination (ex ubuntu@ip:home)
-	- mv the folder to the /var/ww/ (or anywhere you want)
+	using scp -r source destination (ex of destination ubuntu@ip:/var/www/)
+	- or move the folder to the /var/ww/ (or anywhere you want) from home
 
-  3. Create a virtual environment// from home .. so that you don’t face permission issues when installing stuff with pip.. Started it/ activated within the virtual environment
+3. Create a virtual environment// from home .. so that you don’t face permission issues when installing stuff with pip.. Started it/ activated within the virtual environment
 
 	=> python3 -m venv venv(environment name)
 
@@ -257,9 +260,11 @@ server {
 ---
 
 ## 6. Credits
-- **Django** ([Documentation](https://docs.djangoproject.com/en/stable/))
-- **Gunicorn** ([Documentation](https://docs.gunicorn.org/en/stable/))
-- **Nginx** ([Documentation](https://nginx.org/en/docs/))
+- [NewsAPI](https://newsapi.org): For providing live news data.
+- **Django** ([Documentation](https://docs.djangoproject.com/en/stable/)) : For the framework used to build this web application.
+- **Gunicorn** ([Documentation](https://docs.gunicorn.org/en/stable/)): Python WSGI HTTP Server for UNIX
+- **Nginx** ([Documentation](https://nginx.org/en/docs/)): For the web server that hosts the application.
+
 
 ## API Documentation
 
@@ -267,14 +272,10 @@ This app uses the [NewsAPI](https://newsapi.org) to fetch news data. Please refe
 
 ## Challenges
 
-- **Deployment issues with Apache**: One of the main challenges was ensuring that Apache served the Django application correctly using mod_wsgi. this failed and I decided to use gunicorn and nginx
+- **Deployment issues with Apache**: One of the main challenges was ensuring that Apache (which is used initially) served the Django application correctly using mod_wsgi. I couldn't make it work.
+    **solution with Nginx** : I decided to use gunicorn and nginx which was super easy and straight forward.
 - **Static files handling**: Another challenge was configuring static files in Django when deployed to the web server. I had to configure STATIC_ROOT and create a static folder (to render static files)
 
-## Credits
-
-- [NewsAPI](https://newsapi.org): For providing live news data.
-- [Django](https://www.djangoproject.com/): For the framework used to build this web application.
-- [Nginx](https://nginx.org/en/docs/): For the web server that hosts the application.
 
 ## Conclusion
 
