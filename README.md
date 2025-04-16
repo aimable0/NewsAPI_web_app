@@ -261,20 +261,14 @@ server {
 - **Gunicorn** ([Documentation](https://docs.gunicorn.org/en/stable/))
 - **Nginx** ([Documentation](https://nginx.org/en/docs/))
 
-
-
-```bash
-sudo systemctl restart apache2
-```
-
 ## API Documentation
 
 This app uses the [NewsAPI](https://newsapi.org) to fetch news data. Please refer to their official documentation for detailed usage instructions and API limits.
 
 ## Challenges
 
-- **Deployment issues with Apache**: One of the main challenges was ensuring that Apache served the Django application correctly using mod_wsgi. After configuring the Apache virtual host and ensuring all file paths were set correctly, the application began serving as expected.
-- **Static files handling**: Another challenge was configuring static files in Django when deployed to the web server. I had to ensure that Apache was configured to serve these files.
+- **Deployment issues with Apache**: One of the main challenges was ensuring that Apache served the Django application correctly using mod_wsgi. this failed and I decided to use gunicorn and nginx
+- **Static files handling**: Another challenge was configuring static files in Django when deployed to the web server. I had to configure STATIC_ROOT and create a static folder (to render static files)
 
 ## Credits
 
@@ -284,5 +278,5 @@ This app uses the [NewsAPI](https://newsapi.org) to fetch news data. Please refe
 
 ## Conclusion
 
-This project demonstrates how to integrate external news APIs into a Django web application and how to deploy it to a production environment using Apache. It also highlights the challenges encountered during development and how they were resolved.
+This project demonstrates how to integrate external news APIs into a Django web application and how to deploy it to a production environment using Nginx. It also highlights the challenges encountered during development and how they were resolved.
 
