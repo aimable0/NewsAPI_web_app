@@ -88,229 +88,178 @@ python manage.py runserver
 Visit `http://127.0.0.1:8000/` in your browser to see the app in action.
 
 
-## Deploying to Web Server
+## 4. Deploying to Web Server
 
 To deploy the app to a production web server, follow these steps:
-
-1. Install Apache and mod_wsgi:
-
-```bash
-sudo apt install apache2 libapache2-mod-wsgi-py3
-```
-
-2. Set up your Django project on the server, typically in `/var/www/`.
-
-3. Configure your Apache virtual host to serve the Django application. Ensure you include a WSGI configuration like:
-
-4. Restart Apache to apply the configuration:
-
 
 ## Deployment in details
 # NewsAroundYou - Deployment Guide
 
-## Prerequisites
-Before starting the deployment, ensure that you have the following:
-- Ubuntu server (16 or later)
-- Python 3.12 installed
-- Apache2 and uWSGI installed
-- Git installed on the server
+1.  Updated the ubuntu server to match the most recent version..
 
----
+	check version => lsb_release -a
+	update to newer release .. (to make sure our system is uptodate)
+		- sudo apt update && sudo apt upgrade && sudo apt dist-upgrade
+		-  sudo apt install update-manager-core
+		- sudo do-release-upgrade:
+			If this “ModuleNotFoundError: No module named 'apt_pkg'” error then:
+				- sudo ln -sf /usr/bin/python3.8 /usr/bin/python3 (restore python back to the release 						version default)
+				- sudo apt update
+				- sudo apt install --reinstall python3-apt
+		- sudo reboot (restart)
+Or update all packages (if recent version)
+	- sudo apt update
+	- sudo apt upgrade
+	- sudo apt full-upgrade
 
-## 1. Setting Up the Server
+2.  Sent the app folder using scp to the web server ..
+	using scp -r source destination (ex ubuntu@ip:home)
+	- mv the folder to the /var/ww/ (or anywhere you want)
 
-### Updating and Installing Dependencies
-```sh
-sudo apt-get update && sudo apt-get upgrade -y
-sudo apt-get install python3.12 python3.12-dev python3-venv python3-pip gcc -y
-sudo apt-get install apache2 libapache2-mod-wsgi-py3 uwsgi uwsgi-plugin-python3 -y
-sudo apt-get install ufw nginx -y
-```
+  3. Create a virtual environment// from home .. so that you don’t face permission issues when installing stuff with pip.. Started it/ activated within the virtual environment
 
-### Configuring Firewall
-```sh
-sudo ufw default allow outgoing
-sudo ufw default deny incoming
-sudo ufw allow ssh
-sudo ufw allow 80/tcp
-sudo ufw allow 443/tcp
-sudo ufw enable
-sudo ufw status
-```
+	=> python3 -m venv venv(environment name)
 
----
+	if venv is not installed ..:
+		- sudo apt install python3-venv -y
 
-## 2. Setting Up Git and Cloning the Application
-### Installing Git on the Server
-```sh
-sudo apt-get install git -y
-```
+	activate the venv (virtual environment)
+	source venv\bin\activate
 
-### Cloning the Application
-```sh
-cd /var/www
-sudo git clone https://github.com/yourusername/NewsAroundYou.git
-cd NewsAroundYou
-```
+4. Installed requirement libraries + gunicorn
+	=> pip install -r [requirements.txt file location]
 
----
+5. Edited the django app/ settings file to
+	1. add the web server in allowed hosts
+	2. To add where the static_root location.
+		ex: STATIC_ROOT = BASE_DIR / “static/”
+	3. Turn the debug off … (maybe if in production)
 
-## 3. Creating and Configuring Virtual Environment
-```sh
-python3.12 -m venv venv
-source venv/bin/activate
-pip install --upgrade pip setuptools
-pip install -r requirements.txt
-```
++ Edit the /etc/systemd/system/gunicorn.socket:
 
-Ensure proper permissions:
-```sh
-sudo chown -R $USER:$USER /var/www/NewsAroundYou/venv
-```
+    > paste the following:
+—————————start file —————————
+	[Unit]
+	Description=gunicorn socket
 
----
+	[Socket]
+	ListenStream=/run/gunicorn.sock
 
-## 4. Configuring Django
-### Updating Django Settings
-Edit `settings.py`:
-```python
-ALLOWED_HOSTS = ['your-server-ip', 'yourdomain.com']
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-```
-Run migrations and collect static files:
-```sh
-python manage.py migrate
-python manage.py collectstatic --noinput
-```
+	[Install]
+	WantedBy=sockets.target
+—————————end file —————————
 
----
+   and gunicorn.service (same location as above)
 
-## 5. Configuring uWSGI
-### Creating the uWSGI Configuration File
-Create `/var/www/NewsAroundYou/uwsgi.ini`:
-```ini
-[uwsgi]
-chdir = /var/www/NewsAroundYou
-module = NewsAroundYou.wsgi:application
-home = /var/www/NewsAroundYou/venv
-socket = /var/www/NewsAroundYou/NewsAroundYou.sock
-chmod-socket = 664
-vacuum = true
-master = true
-processes = 4
-```
+   > paste the following be sure to check edit your file location..
 
-### Running uWSGI
-```sh
-uwsgi --ini /var/www/NewsAroundYou/uwsgi.ini
-```
+—————————start file —————————
+	[Unit]
+	Description=gunicorn daemon
+	Requires=gunicorn.socket
+	After=network.target
 
----
+	[Service]
+	User=ubuntu
+	Group=www-data
+	WorkingDirectory=/var/www/app/NewsAPI_web_app (edit this to match yours)
+	ExecStart=/home/ubuntu/venv/bin/gunicorn \ (edit this to match yours)
+         		   --access-logfile - \
+		          --workers 3 \
+		          --bind unix:/run/gunicorn.sock \
+	        	  NewsAroundYou.wsgi:application (edit this to match yours)
 
-## 6. Configuring Apache
-### Creating an Apache Configuration File
-Create `/etc/apache2/sites-available/newsaroundyou.conf`:
-```apache
-<VirtualHost *:80>
-    ServerName yourdomain.com
-    ServerAlias www.yourdomain.com
+	[Install]
+	WantedBy=multi-user.target
+—————————end file —————————
 
-    DocumentRoot /var/www/NewsAroundYou
++ Start gunicorn service.
+	sudo systemctl start gunicorn.socket
+	sudo systemctl daemon-reload
+	sudo systemctl enable gunicorn.socket
 
-    <Directory /var/www/NewsAroundYou>
-        Require all granted
-    </Directory>
++ Check status
+	Checked the gunicorn status (make sure its indicated as active)
 
-    Alias /static /var/www/NewsAroundYou/static
-    <Directory /var/www/NewsAroundYou/static>
-        Require all granted
-    </Directory>
++ install nginx (if not installed already)
+    - sudo apt update -y
+    - sudo apt install nginx
 
-    WSGIDaemonProcess NewsAroundYou python-home=/var/www/NewsAroundYou/venv python-path=/var/www/NewsAroundYou
-    WSGIProcessGroup NewsAroundYou
-    WSGIScriptAlias / /var/www/NewsAroundYou/NewsAroundYou/wsgi.py
-</VirtualHost>
-```
-Enable the site and restart Apache:
-```sh
-sudo a2ensite newsaroundyou.conf
-sudo systemctl restart apache2
-```
++ Create/edit nginx configuration.file in sites-available to serve the django app
 
----
+    ex: sudo vi /etc/nginx/sites-available/djangoproject.conf
 
-## 7. Configuring Nginx as a Load Balancer (Optional)
-### Creating an Nginx Configuration File
-Create `/etc/nginx/sites-available/newsaroundyou`:
-```nginx
-upstream app_servers {
-    server 192.168.1.10:8000;
-    server 192.168.1.11:8000;
-}
+Sample (paste and edit):
 server {
     listen 80;
-    server_name yourdomain.com;
+    server_name web-02.naimable.tech www.naimable.tech (examples);
+    add_header X-Served-By $hostname;
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location /static/ {
+        root /var/www/app/NewsAPI_web_app; (should be edited)
+    }
 
     location / {
-        proxy_pass http://app_servers;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        include proxy_params;
+        proxy_pass http://unix:/run/gunicorn.sock;
     }
 }
-```
-Enable the site and restart Nginx:
-```sh
-sudo ln -s /etc/nginx/sites-available/newsaroundyou /etc/nginx/sites-enabled/
-sudo systemctl restart nginx
-```
 
++ enable the configuration file in sites enabled
+
+	> sudo ln -s /etc/nginx/sites-available/djangoproject.conf /etc/nginx/sites-enabled/
+	check if the link is successful:
+		sample:
+			(venv) ubuntu@6355-web-01:/var/www/app/NewsAPI_web_app$ ls -l /etc/nginx/sites-enabled/
+			total 0
+			lrwxrwxrwx 1 root root 34 Mar 28 00:20 default -> /etc/nginx/sites-available/default
+			lrwxrwxrwx 1 root root 45 Apr 16 00:22 djangoproject.conf -> /etc/nginx/sites-available/				djangoproject.conf
+
+	> check if the configuration in nginx are okey
+	comp$ sudo nginx -t
+	sample:
+		nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+		nginx: configuration file /etc/nginx/nginx.conf test is successful
+
++ restart nginx
+	- systemctl restart nginx
+	- systemctl enable nginx
+
+	> check status (if active)
+		- systemctl status nginx
+
+	> f any error (in this step) .. allow the nginx in ufw, try:
+		- [sudo] ufw allow “Nginx Full”
+
++ reload daemon
+	- sudo systemctl daemon-reload
+
++ restart gunicorn
+	- sudo systemctl restart gunicorn
+	- sudo systemctl enable gunicorn
+
+	> check status
+		- sudo systemctl status gunicorn
+ ≠≠≠≠ test your web server.. example web-01.naimable.tech using a incognito..
+	—> you should se the app without css .. (don’t worry we have not yet configured the static files)
+
++ Create static file folder to render css and other static file
+	run the code inside your django project.
+	- python3 manage.py collectstatic
+
++ Test again and  :) this should render the page with its static components.
 ---
 
-## 8. Testing the Deployment
-### Verify Application Running
-```sh
-curl http://your-server-ip
-```
-### Verify uWSGI Socket
-```sh
-ls -lah /var/www/NewsAroundYou/NewsAroundYou.sock
-```
-### Check Logs for Issues
-```sh
-sudo tail -f /var/log/apache2/error.log
-sudo tail -f /var/log/nginx/error.log
-```
-
----
-
-## 9. Challenges Faced and Solutions
-### Working with Virtual Environments
-**Issue:** `pip install` failing due to permissions
-**Solution:** Ensure virtual environment has correct ownership:
-```sh
-sudo chown -R $USER:$USER /var/www/NewsAroundYou/venv
-```
-
-### Fixing uWSGI Module Errors
-**Issue:** `uwsgi --module` throwing an invalid option error
-**Solution:** Install uWSGI plugins:
-```sh
-sudo apt install uwsgi uwsgi-plugin-python3
-```
-
-
----
-
-## 10. API Used
+## 5. API Used
 - **NewsAPI.org** ([Documentation](https://newsapi.org/docs))
 
 ---
 
-## 11. Credits
+## 6. Credits
 - **Django** ([Documentation](https://docs.djangoproject.com/en/stable/))
-- **uWSGI** ([Documentation](https://uwsgi-docs.readthedocs.io/en/latest/))
-- **Apache** ([Documentation](https://httpd.apache.org/docs/))
+- **Gunicorn** ([Documentation](https://docs.gunicorn.org/en/stable/))
+- **Nginx** ([Documentation](https://nginx.org/en/docs/))
 
 
 
@@ -331,7 +280,7 @@ This app uses the [NewsAPI](https://newsapi.org) to fetch news data. Please refe
 
 - [NewsAPI](https://newsapi.org): For providing live news data.
 - [Django](https://www.djangoproject.com/): For the framework used to build this web application.
-- [Apache](https://httpd.apache.org/): For the web server that hosts the application.
+- [Nginx](https://nginx.org/en/docs/): For the web server that hosts the application.
 
 ## Conclusion
 
